@@ -15,7 +15,15 @@ export function normalizeCategory(category) {
   return CATEGORIES.some(({ id }) => id === category) ? category : DEFAULT_CATEGORY;
 }
 
-export function addTodo(todos, title, category, id = crypto.randomUUID()) {
+// crypto.randomUUID() only exists in secure contexts (HTTPS or localhost). Opening the app over
+// plain HTTP on a LAN address, e.g. from a phone, needs the getRandomValues() fallback.
+export function createId(cryptoApi = crypto) {
+  if (typeof cryptoApi.randomUUID === 'function') return cryptoApi.randomUUID();
+  const bytes = cryptoApi.getRandomValues(new Uint8Array(16));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+export function addTodo(todos, title, category, id = createId()) {
   const trimmed = title.trim();
   if (!trimmed) return todos;
   return [...todos, { id, title: trimmed, completed: false, category: normalizeCategory(category) }];

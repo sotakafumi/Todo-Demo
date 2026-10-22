@@ -6,6 +6,7 @@ import {
   changeCategory,
   clearCompleted,
   countActive,
+  createId,
   editTodo,
   filterTodos,
   groupByCategory,
@@ -40,6 +41,14 @@ test('addTodo generates an id when none is given', () => {
   const [todo] = addTodo([], '掃除', 'now');
   assert.equal(typeof todo.id, 'string');
   assert.notEqual(todo.id, '');
+});
+
+test('createId falls back to getRandomValues outside secure contexts', () => {
+  // Shaped like `crypto` on a plain-HTTP LAN page: no randomUUID.
+  const insecureCrypto = { getRandomValues: (array) => crypto.getRandomValues(array) };
+  const id = createId(insecureCrypto);
+  assert.match(id, /^[0-9a-f]{32}$/);
+  assert.notEqual(createId(insecureCrypto), id);
 });
 
 test('normalizeCategory keeps known categories and defaults the rest', () => {

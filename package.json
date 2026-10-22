@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.js",
+    "start:lan": "node scripts/serve.js --lan",
     "test": "node --test"
   }
 }

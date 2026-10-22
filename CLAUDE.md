@@ -9,6 +9,7 @@ A browser TODO app (UI text in Japanese) written in vanilla HTML/CSS/JavaScript 
 ## Commands
 
 - `npm start` — serve the app at http://localhost:3000 (`PORT` env var overrides). Opening `index.html` directly via `file://` does not work because browsers block ES modules there.
+- `npm run start:lan` — same, but listens on all interfaces and prints the LAN URLs, for opening the app from a phone on the same network.
 - `npm test` — run all tests with Node's built-in runner (`node --test`, picks up `test/*.test.js`).
 - Single file: `node --test test/todo.test.js`
 - Single test by name: `node --test --test-name-pattern="editTodo" test/`
@@ -18,7 +19,9 @@ A browser TODO app (UI text in Japanese) written in vanilla HTML/CSS/JavaScript 
 - `src/todo.js` — pure state functions (`addTodo`, `toggleTodo`, `editTodo`, ...). Every function takes the todo array and returns a new one without mutating it; tests rely on this by passing frozen arrays. Business rules live here, e.g. a blank title on edit deletes the todo. `CATEGORIES` (今すぐやる / 連絡待ち / プロジェクト / いつかやる) is the single source for category ids, labels and display order. The UI picker and the grouped list are both generated from it.
 - `src/storage.js` — `loadTodos`/`saveTodos` against `localStorage`, with the storage object injectable for tests. Loading validates entries and falls back to `[]` on corrupt data. It also migrates on read: a missing or unknown `category` becomes `DEFAULT_CATEGORY` (`now`), which covers data saved before categories existed.
 - `src/app.js` — DOM layer. All mutations go through `update(next)`, which saves and then calls `render()`, which rebuilds the whole board from state (and restores focus to the same control afterwards). The board (`#todo-groups`) shows one section per category that has visible todos, after the すべて/未完了/完了 filter is applied. Events are delegated on `#todo-groups` and dispatched by `data-action` (`toggle` / `move` on `change`, `edit` / `remove` on `click`). Only this file touches the DOM, so it has no automated tests.
-- `scripts/serve.js` — dependency-free static file server for development only (binds to 127.0.0.1, rejects paths outside the repo).
+- `scripts/serve.js` — dependency-free static file server for development only. Binds to 127.0.0.1 unless `--lan` is passed. Rejects paths outside the repo and dotfiles (e.g. `.git`).
+
+Over a LAN address the page is plain HTTP and therefore not a secure context, so secure-context-only APIs such as `crypto.randomUUID()` are unavailable. Todo IDs come from `createId()`, which falls back to `crypto.getRandomValues()`. Any new browser API needs the same check.
 
 Todo shape: `{ id: string, title: string, completed: boolean, category: 'now' | 'waiting' | 'project' | 'someday' }`.
 
