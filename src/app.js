@@ -108,8 +108,11 @@ function startEditing(item) {
   field.addEventListener('keydown', (event) => {
     // The Enter that confirms an IME conversion must not save. Safari reports it as keyCode 229.
     if (event.isComposing || event.keyCode === 229) return;
-    if (event.key === 'Enter') finish(true, true);
-    else if (event.key === 'Escape') finish(false, true);
+    if (event.key !== 'Enter' && event.key !== 'Escape') return;
+    // finish() moves focus to the ✎ button; without this, the same Enter keypress would
+    // activate that button and immediately reopen the editor.
+    event.preventDefault();
+    finish(event.key === 'Enter', true);
   });
   field.addEventListener('blur', () => finish(true, false));
 
