@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CATEGORIES,
   addTodo,
+  changeCategory,
   clearCompleted,
   countActive,
   editTodo,
@@ -60,6 +61,17 @@ test('editTodo replaces the title with a trimmed one and keeps the category', ()
 
 test('editTodo with a blank title removes the todo', () => {
   assert.deepEqual(editTodo(sample, 'a', '  '), [sample[1]]);
+});
+
+test('changeCategory moves only the matching todo and keeps its position', () => {
+  assert.deepEqual(changeCategory(sample, 'b', 'now'), [
+    sample[0],
+    { id: 'b', title: '見積もりの返事', completed: true, category: 'now' },
+  ]);
+});
+
+test('changeCategory falls back to the default category for an unknown one', () => {
+  assert.equal(changeCategory(sample, 'b', 'bogus')[1].category, 'now');
 });
 
 test('removeTodo drops the matching todo', () => {

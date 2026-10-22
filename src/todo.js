@@ -32,6 +32,12 @@ export function editTodo(todos, id, title) {
   return todos.map((todo) => (todo.id === id ? { ...todo, title: trimmed } : todo));
 }
 
+// The todo keeps its position in the array, so within the new group it sorts by creation order.
+export function changeCategory(todos, id, category) {
+  const next = normalizeCategory(category);
+  return todos.map((todo) => (todo.id === id ? { ...todo, category: next } : todo));
+}
+
 export function removeTodo(todos, id) {
   return todos.filter((todo) => todo.id !== id);
 }

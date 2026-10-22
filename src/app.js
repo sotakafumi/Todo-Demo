@@ -2,6 +2,7 @@ import {
   CATEGORIES,
   DEFAULT_CATEGORY,
   addTodo,
+  changeCategory,
   clearCompleted,
   countActive,
   editTodo,
@@ -89,9 +90,18 @@ function renderItem(todo) {
   title.className = 'title';
   title.textContent = todo.title;
 
+  const categorySelect = document.createElement('select');
+  categorySelect.className = 'category-select';
+  categorySelect.dataset.action = 'move';
+  categorySelect.setAttribute('aria-label', `「${todo.title}」の分類`);
+  for (const { id, label } of CATEGORIES) {
+    categorySelect.add(new Option(label, id, false, id === todo.category));
+  }
+
   item.append(
     checkbox,
     title,
+    categorySelect,
     iconButton('edit', '✎', `「${todo.title}」を編集`),
     iconButton('remove', '×', `「${todo.title}」を削除`),
   );
@@ -168,10 +178,12 @@ form.addEventListener('submit', (event) => {
   input.focus();
 });
 
+// After a move, render() restores focus to the same todo's select, now in its new group.
 board.addEventListener('change', (event) => {
-  if (event.target.dataset.action === 'toggle') {
-    update(toggleTodo(todos, event.target.closest('li').dataset.id));
-  }
+  const { action } = event.target.dataset;
+  const id = event.target.closest('li')?.dataset.id;
+  if (action === 'toggle') update(toggleTodo(todos, id));
+  if (action === 'move') update(changeCategory(todos, id, event.target.value));
 });
 
 board.addEventListener('click', (event) => {

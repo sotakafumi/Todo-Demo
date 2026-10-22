@@ -202,6 +202,24 @@ h1 {
   text-decoration: line-through;
 }
 
+.category-select {
+  flex: none;
+  max-width: 7.5rem;
+  padding: 3px 4px;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.category-select:hover {
+  color: var(--text);
+}
+
 .icon-button {
   flex: none;
   width: 32px;
@@ -213,13 +231,17 @@ h1 {
   opacity: 0;
 }
 
-.todo:hover .icon-button,
-.icon-button:focus-visible {
+/* Row controls appear on hover or focus. :focus (not :focus-visible) keeps the select
+   visible while its dropdown is open after a mouse click. */
+.todo:hover :is(.icon-button, .category-select),
+.icon-button:focus-visible,
+.category-select:focus {
   opacity: 1;
 }
 
 @media (hover: none) {
-  .icon-button {
+  .icon-button,
+  .category-select {
     opacity: 1;
   }
 }
