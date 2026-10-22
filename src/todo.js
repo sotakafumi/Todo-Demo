@@ -1,10 +1,24 @@
 // Pure state functions. Each returns a new array and never mutates its input,
 // so the UI can treat every change as "replace the whole list".
 
-export function addTodo(todos, title, id = crypto.randomUUID()) {
+// Display order of the groups follows this array.
+export const CATEGORIES = [
+  { id: 'now', label: '今すぐやる' },
+  { id: 'waiting', label: '連絡待ち' },
+  { id: 'project', label: 'プロジェクト' },
+  { id: 'someday', label: 'いつかやる' },
+];
+
+export const DEFAULT_CATEGORY = 'now';
+
+export function normalizeCategory(category) {
+  return CATEGORIES.some(({ id }) => id === category) ? category : DEFAULT_CATEGORY;
+}
+
+export function addTodo(todos, title, category, id = crypto.randomUUID()) {
   const trimmed = title.trim();
   if (!trimmed) return todos;
-  return [...todos, { id, title: trimmed, completed: false }];
+  return [...todos, { id, title: trimmed, completed: false, category: normalizeCategory(category) }];
 }
 
 export function toggleTodo(todos, id) {
@@ -34,4 +48,13 @@ export function filterTodos(todos, filter) {
 
 export function countActive(todos) {
   return todos.filter((todo) => !todo.completed).length;
+}
+
+// One entry per category in CATEGORIES order, including empty ones.
+export function groupByCategory(todos) {
+  return CATEGORIES.map(({ id, label }) => ({
+    id,
+    label,
+    todos: todos.filter((todo) => todo.category === id),
+  }));
 }

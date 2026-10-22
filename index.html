@@ -13,11 +13,16 @@
       <h1>TODO</h1>
 
       <form id="new-todo-form" class="new-todo">
-        <input id="new-todo" type="text" placeholder="やることを入力して Enter" autocomplete="off" autofocus aria-label="新しいTODO">
-        <button type="submit">追加</button>
+        <div class="new-todo-row">
+          <input id="new-todo" type="text" placeholder="やることを入力して Enter" autocomplete="off" autofocus aria-label="新しいTODO">
+          <button type="submit">追加</button>
+        </div>
+        <div id="category-picker" class="category-picker" role="radiogroup" aria-labelledby="category-label">
+          <span id="category-label" class="category-label">分類</span>
+        </div>
       </form>
 
-      <ul id="todo-list" class="todo-list"></ul>
+      <div id="todo-groups"></div>
       <p id="empty" class="empty" hidden></p>
 
       <footer id="footer" class="footer" hidden>

@@ -14,9 +14,20 @@ function fakeStorage(initial = {}) {
 
 test('saved todos load back unchanged', () => {
   const storage = fakeStorage();
-  const todos = [{ id: 'a', title: '牛乳を買う', completed: false }];
+  const todos = [{ id: 'a', title: '牛乳を買う', completed: false, category: 'waiting' }];
   saveTodos(todos, storage);
   assert.deepEqual(loadTodos(storage), todos);
+});
+
+test('loadTodos puts todos without a valid category into the default one', () => {
+  const stored = JSON.stringify([
+    { id: 'a', title: '牛乳を買う', completed: false },
+    { id: 'b', title: '洗濯', completed: true, category: 'bogus' },
+  ]);
+  assert.deepEqual(loadTodos(fakeStorage({ [STORAGE_KEY]: stored })), [
+    { id: 'a', title: '牛乳を買う', completed: false, category: 'now' },
+    { id: 'b', title: '洗濯', completed: true, category: 'now' },
+  ]);
 });
 
 test('loadTodos returns an empty list when nothing is stored', () => {
@@ -35,7 +46,7 @@ test('loadTodos drops malformed entries', () => {
     null,
   ]);
   assert.deepEqual(loadTodos(fakeStorage({ [STORAGE_KEY]: stored })), [
-    { id: 'a', title: '牛乳を買う', completed: false },
+    { id: 'a', title: '牛乳を買う', completed: false, category: 'now' },
   ]);
 });
 

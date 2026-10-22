@@ -1,9 +1,12 @@
 import {
+  CATEGORIES,
+  DEFAULT_CATEGORY,
   addTodo,
   clearCompleted,
   countActive,
   editTodo,
   filterTodos,
+  groupByCategory,
   removeTodo,
   toggleTodo,
 } from './todo.js';
@@ -11,7 +14,8 @@ import { loadTodos, saveTodos } from './storage.js';
 
 const form = document.querySelector('#new-todo-form');
 const input = document.querySelector('#new-todo');
-const list = document.querySelector('#todo-list');
+const categoryPicker = document.querySelector('#category-picker');
+const board = document.querySelector('#todo-groups');
 const empty = document.querySelector('#empty');
 const footer = document.querySelector('#footer');
 const count = document.querySelector('#count');
@@ -31,13 +35,13 @@ function update(next) {
 function render() {
   // Rebuilding the list drops focus, so remember which control had it and restore it afterwards.
   const focused = document.activeElement;
-  const focusedId = focused?.closest('#todo-list li')?.dataset.id;
+  const focusedId = focused?.closest('#todo-groups li')?.dataset.id;
   const focusedAction = focused?.dataset.action;
 
-  const visible = filterTodos(todos, filter);
-  list.replaceChildren(...visible.map(renderItem));
+  const groups = groupByCategory(filterTodos(todos, filter)).filter((group) => group.todos.length > 0);
+  board.replaceChildren(...groups.map(renderGroup));
 
-  empty.hidden = visible.length > 0;
+  empty.hidden = groups.length > 0;
   empty.textContent = todos.length === 0 ? 'TODOはまだありません' : '該当するTODOはありません';
   footer.hidden = todos.length === 0;
   count.textContent = `残り ${countActive(todos)} 件`;
@@ -47,6 +51,26 @@ function render() {
   }
 
   if (focusedId && focusedAction) focusControl(focusedId, focusedAction);
+}
+
+function renderGroup({ id, label, todos: items }) {
+  const section = document.createElement('section');
+  section.className = 'group';
+  section.dataset.category = id;
+
+  const heading = document.createElement('h2');
+  heading.className = 'group-title';
+  const badge = document.createElement('span');
+  badge.className = 'group-count';
+  badge.textContent = items.length;
+  heading.append(label, badge);
+
+  const list = document.createElement('ul');
+  list.className = 'todo-list';
+  list.append(...items.map(renderItem));
+
+  section.append(heading, list);
+  return section;
 }
 
 function renderItem(todo) {
@@ -84,8 +108,23 @@ function iconButton(action, text, label) {
   return button;
 }
 
+function renderCategoryPicker() {
+  for (const { id, label } of CATEGORIES) {
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'category';
+    radio.value = id;
+    radio.checked = id === DEFAULT_CATEGORY;
+
+    const option = document.createElement('label');
+    option.className = 'category-option';
+    option.append(radio, label);
+    categoryPicker.append(option);
+  }
+}
+
 function focusControl(id, action) {
-  list.querySelector(`li[data-id="${CSS.escape(id)}"] [data-action="${action}"]`)?.focus();
+  board.querySelector(`li[data-id="${CSS.escape(id)}"] [data-action="${action}"]`)?.focus();
 }
 
 function startEditing(item) {
@@ -121,19 +160,21 @@ function startEditing(item) {
   field.select();
 }
 
+// The chosen category stays selected after adding, so several todos can go into the same one.
 form.addEventListener('submit', (event) => {
   event.preventDefault();
-  update(addTodo(todos, input.value));
+  update(addTodo(todos, input.value, form.elements.category.value));
   input.value = '';
+  input.focus();
 });
 
-list.addEventListener('change', (event) => {
+board.addEventListener('change', (event) => {
   if (event.target.dataset.action === 'toggle') {
     update(toggleTodo(todos, event.target.closest('li').dataset.id));
   }
 });
 
-list.addEventListener('click', (event) => {
+board.addEventListener('click', (event) => {
   const button = event.target.closest('button[data-action]');
   if (!button) return;
   const item = button.closest('li');
@@ -141,7 +182,7 @@ list.addEventListener('click', (event) => {
   if (button.dataset.action === 'remove') update(removeTodo(todos, item.dataset.id));
 });
 
-list.addEventListener('dblclick', (event) => {
+board.addEventListener('dblclick', (event) => {
   if (event.target.matches('.title')) startEditing(event.target.closest('li'));
 });
 
@@ -154,4 +195,5 @@ for (const button of filterButtons) {
 
 clearButton.addEventListener('click', () => update(clearCompleted(todos)));
 
+renderCategoryPicker();
 render();

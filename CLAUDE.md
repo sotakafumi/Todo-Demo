@@ -15,11 +15,11 @@ A browser TODO app (UI text in Japanese) written in vanilla HTML/CSS/JavaScript 
 
 ## Architecture
 
-- `src/todo.js` — pure state functions (`addTodo`, `toggleTodo`, `editTodo`, ...). Every function takes the todo array and returns a new one without mutating it; tests rely on this by passing frozen arrays. Business rules live here, e.g. a blank title on edit deletes the todo.
-- `src/storage.js` — `loadTodos`/`saveTodos` against `localStorage`, with the storage object injectable for tests. Loading validates entries and falls back to `[]` on corrupt data.
-- `src/app.js` — DOM layer. All mutations go through `update(next)`, which saves and then calls `render()`, which rebuilds the whole list from state (and restores focus to the same control afterwards). List events are delegated on `#todo-list` and dispatched by `data-action` (`toggle` / `edit` / `remove`). Only this file touches the DOM, so it has no automated tests.
+- `src/todo.js` — pure state functions (`addTodo`, `toggleTodo`, `editTodo`, ...). Every function takes the todo array and returns a new one without mutating it; tests rely on this by passing frozen arrays. Business rules live here, e.g. a blank title on edit deletes the todo. `CATEGORIES` (今すぐやる / 連絡待ち / プロジェクト / いつかやる) is the single source for category ids, labels and display order. The UI picker and the grouped list are both generated from it.
+- `src/storage.js` — `loadTodos`/`saveTodos` against `localStorage`, with the storage object injectable for tests. Loading validates entries and falls back to `[]` on corrupt data. It also migrates on read: a missing or unknown `category` becomes `DEFAULT_CATEGORY` (`now`), which covers data saved before categories existed.
+- `src/app.js` — DOM layer. All mutations go through `update(next)`, which saves and then calls `render()`, which rebuilds the whole board from state (and restores focus to the same control afterwards). The board (`#todo-groups`) shows one section per category that has visible todos, after the すべて/未完了/完了 filter is applied. Events are delegated on `#todo-groups` and dispatched by `data-action` (`toggle` / `edit` / `remove`). Only this file touches the DOM, so it has no automated tests.
 - `scripts/serve.js` — dependency-free static file server for development only (binds to 127.0.0.1, rejects paths outside the repo).
 
-Todo shape: `{ id: string, title: string, completed: boolean }`.
+Todo shape: `{ id: string, title: string, completed: boolean, category: 'now' | 'waiting' | 'project' | 'someday' }`.
 
 The inline editor ignores Enter while an IME composition is active (`isComposing` / `keyCode === 229`), so Japanese input can confirm a conversion without saving. Keep that guard on any new Enter-key handlers.
