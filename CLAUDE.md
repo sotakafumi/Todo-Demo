@@ -14,6 +14,15 @@ A browser TODO app (UI text in Japanese) written in vanilla HTML/CSS/JavaScript 
 - Single file: `node --test test/todo.test.js`
 - Single test by name: `node --test --test-name-pattern="editTodo" test/`
 
+## Deployment
+
+The app is published on GitHub Pages at https://sotakafumi.github.io/Todo-Demo/. Pages serves the repository root of the `master` branch as-is (classic branch build, no workflow file), so pushing to `master` deploys. There is no CI, so run `npm test` before pushing. Check the build with `gh api repos/sotakafumi/Todo-Demo/pages/builds/latest --jq .status` (`built` / `building` / `errored`).
+
+- The site lives under the `/Todo-Demo/` subpath, so asset and module paths must stay relative (`src/app.js`, `./todo.js`). A root-absolute path like `/src/app.js` works on `npm start` but 404s on Pages.
+- The branch build runs Jekyll, which drops files and folders whose names start with `_` or `.`. Don't give served files such names, or add an empty `.nojekyll` at the root.
+- The repository is public because the current GitHub plan does not support Pages for private repositories. Everything committed is world-readable, both on GitHub and on the site.
+- Pages is HTTPS, so it is a secure context, unlike the LAN dev server.
+
 ## Architecture
 
 - `src/todo.js` — pure state functions (`addTodo`, `toggleTodo`, `editTodo`, ...). Every function takes the todo array and returns a new one without mutating it; tests rely on this by passing frozen arrays. Business rules live here, e.g. a blank title on edit deletes the todo. `CATEGORIES` (今すぐやる / 連絡待ち / プロジェクト / いつかやる) is the single source for category ids, labels and display order. The UI picker and the grouped list are both generated from it.
