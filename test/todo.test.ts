@@ -13,7 +13,7 @@ import {
   normalizeCategory,
   removeTodo,
   toggleTodo,
-} from '../src/todo.js';
+} from '../src/lib/todo.ts';
 
 // Frozen so any accidental mutation throws (modules run in strict mode).
 const sample = Object.freeze([
@@ -45,7 +45,7 @@ test('addTodo generates an id when none is given', () => {
 
 test('createId falls back to getRandomValues outside secure contexts', () => {
   // Shaped like `crypto` on a plain-HTTP LAN page: no randomUUID.
-  const insecureCrypto = { getRandomValues: (array) => crypto.getRandomValues(array) };
+  const insecureCrypto = { getRandomValues: (array: Uint8Array) => crypto.getRandomValues(array) };
   const id = createId(insecureCrypto);
   assert.match(id, /^[0-9a-f]{32}$/);
   assert.notEqual(createId(insecureCrypto), id);

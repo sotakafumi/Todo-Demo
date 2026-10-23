@@ -1,12 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { STORAGE_KEY, loadTodos, saveTodos } from '../src/storage.js';
+import { STORAGE_KEY, loadTodos, saveTodos } from '../src/lib/storage.ts';
+import type { Todo } from '../src/lib/todo.ts';
 
-function fakeStorage(initial = {}) {
+function fakeStorage(initial: Record<string, string> = {}) {
   const data = { ...initial };
   return {
-    getItem: (key) => data[key] ?? null,
-    setItem: (key, value) => {
+    getItem: (key: string) => data[key] ?? null,
+    setItem: (key: string, value: string) => {
       data[key] = String(value);
     },
   };
@@ -14,7 +15,7 @@ function fakeStorage(initial = {}) {
 
 test('saved todos load back unchanged', () => {
   const storage = fakeStorage();
-  const todos = [{ id: 'a', title: '牛乳を買う', completed: false, category: 'waiting' }];
+  const todos: Todo[] = [{ id: 'a', title: '牛乳を買う', completed: false, category: 'waiting' }];
   saveTodos(todos, storage);
   assert.deepEqual(loadTodos(storage), todos);
 });

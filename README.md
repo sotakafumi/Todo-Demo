@@ -1,19 +1,22 @@
 # TODO
 
-ブラウザで動く TODO アプリです。素の HTML / CSS / JavaScript (ES modules) で書かれていて、依存パッケージやビルド手順はありません。TODO はブラウザの `localStorage` に保存されます。
+ブラウザで動く TODO アプリです。Next.js (App Router) と TypeScript で書かれていて、静的ファイルとして書き出して配信します。TODO はブラウザの `localStorage` に保存されます。
 
 ## 公開URL
 
 https://sotakafumi.github.io/Todo-Demo/
 
-`master` ブランチに push すると GitHub Pages に自動でデプロイされます。
+`master` ブランチに push すると、GitHub Actions がビルドして GitHub Pages にデプロイします。
 
 ## ローカルで動かす
 
-```sh
-npm start          # http://localhost:3000 で起動
-npm run start:lan  # 同じネットワークのスマホから開く場合
-npm test           # テストを実行
-```
+Node.js 24 以上が必要です。
 
-`index.html` を `file://` で直接開くと ES modules が読み込めないため、`npm start` を使ってください。
+```sh
+npm install
+npm run dev        # 開発サーバー (http://localhost:3000)
+npm test           # テストを実行
+npm run build      # out/ に静的ファイルを書き出す
+npm start          # out/ を http://localhost:3000 で配信
+npm run start:lan  # out/ を同じネットワークのスマホからも開けるように配信
+```
